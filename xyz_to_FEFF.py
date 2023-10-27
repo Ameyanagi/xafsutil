@@ -3,6 +3,7 @@ from tqdm import tqdm
 import numpy as np
 import subprocess
 import os
+import shutil
 
 feff_dir = "./jfeff_feff10.0.0_linux_install/JFEFF/feff10/linux/"
 fdmnes_bin = "./fdmnes_Linux/fdmnes_linux64"
@@ -328,20 +329,25 @@ def make_fdmnes_coordinates_from_xyz(xyz, absorber=0):
     return fdmnes_coordinates, absorber + 1
 
 
-def run_feff_from_xyz(xyz, directory, absorber=0, edge="K", title="test"):
+def run_feff_from_xyz(xyz, directory, absorber=0, edge="K", title="test", xmu_path=None):
     potentials, atoms = make_potential_atoms_from_xyz(xyz, absorber=absorber)
     feff_inp = feff_template.format(
         title=title, edge=edge, potentials=potentials, atoms=atoms
     )
     run_feff_from_string(feff_inp, directory)
+    
+    if xmu_path is not None:
+        os.makedirs(os.path.dirname(xmu_path), exist_ok=True)
+        shutil.copy(directory + "xmu.dat", xmu_path)
+        
 
-def run_feff_from_xyz_file(xyz_file, directory, absorber=0, edge="K", title="test"):
+def run_feff_from_xyz_file(xyz_file, directory, absorber=0, edge="K", title="test", xmu_path=None):
     with open(xyz_file, "r") as f:
         xyz = f.read()
-    run_feff_from_xyz(xyz, directory, absorber=absorber, edge=edge, title=title)
+    run_feff_from_xyz(xyz, directory, absorber=absorber, edge=edge, title=title, xmu_path=xmu_path)
 
 
-def run_fdmnes_from_xyz(xyz, directory, absorber=0, edge="K", filename="tmp"):
+def run_fdmnes_from_xyz(xyz, directory, absorber=0, edge="K", filename="tmp", conv_path=None, bav_path=None):
     fdmnes_coordinates, fdmnes_absorber = make_fdmnes_coordinates_from_xyz(xyz, absorber=absorber)
     fdmnes_inp = fdmnes_template.format(
         absorber=fdmnes_absorber, edge=edge, filename=filename, coordinates=fdmnes_coordinates
@@ -350,10 +356,20 @@ def run_fdmnes_from_xyz(xyz, directory, absorber=0, edge="K", filename="tmp"):
         fdmnes_inp, directory, filename=filename
     )
     
-def run_fdmnes_from_xyz_file(xyz_file, directory, absorber=0, edge="K", filename="tmp"):
+    if conv_path is not None:
+        os.makedirs(os.path.dirname(conv_path), exist_ok=True)
+        shutil.copy(directory + f"{filename}_conv.txt", conv_path)
+        
+    if bav_path is not None:
+        os.makedirs(os.path.dirname(bav_path), exist_ok=True)
+        shutil.copy(directory + f"{filename}.bav", bav_path)
+    
+    
+    
+def run_fdmnes_from_xyz_file(xyz_file, directory, absorber=0, edge="K", filename="tmp", conv_path=None, bav_path=None):
     with open(xyz_file, "r") as f:
         xyz = f.read()
-    run_fdmnes_from_xyz(xyz, directory, absorber=absorber, edge=edge, filename=filename)
+    run_fdmnes_from_xyz(xyz, directory, absorber=absorber, edge=edge, filename=filename, conv_path=conv_path, bav_path=bav_path)
 
 def lattice_points_to_xyz(lattice_points, atoms):
     lattice_points = np.array(lattice_points)
