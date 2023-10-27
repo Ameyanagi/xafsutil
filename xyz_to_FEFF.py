@@ -335,6 +335,11 @@ def run_feff_from_xyz(xyz, directory, absorber=0, edge="K", title="test"):
     )
     run_feff_from_string(feff_inp, directory)
 
+def run_feff_from_xyz_file(xyz_file, directory, absorber=0, edge="K", title="test"):
+    with open(xyz_file, "r") as f:
+        xyz = f.read()
+    run_feff_from_xyz(xyz, directory, absorber=absorber, edge=edge, title=title)
+
 
 def run_fdmnes_from_xyz(xyz, directory, absorber=0, edge="K", filename="tmp"):
     fdmnes_coordinates, fdmnes_absorber = make_fdmnes_coordinates_from_xyz(xyz, absorber=absorber)
@@ -344,6 +349,11 @@ def run_fdmnes_from_xyz(xyz, directory, absorber=0, edge="K", filename="tmp"):
     run_fdmnes_from_string(
         fdmnes_inp, directory, filename=filename
     )
+    
+def run_fdmnes_from_xyz_file(xyz_file, directory, absorber=0, edge="K", filename="tmp"):
+    with open(xyz_file, "r") as f:
+        xyz = f.read()
+    run_fdmnes_from_xyz(xyz, directory, absorber=absorber, edge=edge, filename=filename)
 
 def lattice_points_to_xyz(lattice_points, atoms):
     lattice_points = np.array(lattice_points)
