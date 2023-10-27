@@ -172,7 +172,6 @@ Relativism
 Edge
 {edge}
 Center_abs
-One_run
 Range	!	Energy	range	of	calculation	(eV)
 -3.	0.2	5.	0.5	20.	1.	75.	!	first	energy,	step,	intermediary	energy,	step	...,	last	energy
 Molecule
