@@ -362,7 +362,7 @@ def run_fdmnes_from_xyz(xyz, directory, absorber=0, edge="K", filename="tmp", co
         
     if bav_path is not None:
         os.makedirs(os.path.dirname(bav_path), exist_ok=True)
-        shutil.copy(directory + f"{filename}.bav", bav_path)
+        shutil.copy(directory + f"{filename}_bav.txt", bav_path)
     
     
     
