@@ -172,6 +172,7 @@ Relativism
 Edge
 {edge}
 Center_abs
+One_run
 Range	!	Energy	range	of	calculation	(eV)
 -3.	0.2	5.	0.5	20.	1.	75.	!	first	energy,	step,	intermediary	energy,	step	...,	last	energy
 Molecule
@@ -218,9 +219,7 @@ def run_fdmnes(directory, filename="tmp"):
     subprocess.run(cmd, shell=True)
 
 
-def run_fdmnes_from_string(
-    fdmnes_inp, directory, filename="tmp", edge="K", absorber=1
-):
+def run_fdmnes_from_string(fdmnes_inp, directory, filename="tmp", edge="K", absorber=1):
     os.makedirs(directory, exist_ok=True)
     with open(directory + f"{filename}.inp.txt", "w") as f:
         f.write(fdmnes_inp.format(edge=edge, filename=filename, absorber=absorber))
@@ -329,57 +328,88 @@ def make_fdmnes_coordinates_from_xyz(xyz, absorber=0):
     return fdmnes_coordinates, absorber + 1
 
 
-def run_feff_from_xyz(xyz, directory, absorber=0, edge="K", title="test", xmu_path=None):
+def run_feff_from_xyz(
+    xyz, directory, absorber=0, edge="K", title="test", xmu_path=None, feff_inp_path=None
+):
     potentials, atoms = make_potential_atoms_from_xyz(xyz, absorber=absorber)
     feff_inp = feff_template.format(
         title=title, edge=edge, potentials=potentials, atoms=atoms
     )
     run_feff_from_string(feff_inp, directory)
-    
+
     if xmu_path is not None:
         os.makedirs(os.path.dirname(xmu_path), exist_ok=True)
         shutil.copy(directory + "xmu.dat", xmu_path)
         
+    if feff_inp_path is not None:
+        os.makedirs(os.path.dirname(feff_inp_path), exist_ok=True)
+        shutil.copy(directory + "feff.inp", feff_inp_path)
 
-def run_feff_from_xyz_file(xyz_file, directory, absorber=0, edge="K", title="test", xmu_path=None):
+
+def run_feff_from_xyz_file(
+    xyz_file, directory, absorber=0, edge="K", title="test", xmu_path=None, feff_inp_path=None
+):
     with open(xyz_file, "r") as f:
         xyz = f.read()
-    run_feff_from_xyz(xyz, directory, absorber=absorber, edge=edge, title=title, xmu_path=xmu_path)
+    run_feff_from_xyz(
+        xyz, directory, absorber=absorber, edge=edge, title=title, xmu_path=xmu_path, feff_inp_path=feff_inp_path
+    )
 
 
-def run_fdmnes_from_xyz(xyz, directory, absorber=0, edge="K", filename="tmp", conv_path=None, bav_path=None):
-    fdmnes_coordinates, fdmnes_absorber = make_fdmnes_coordinates_from_xyz(xyz, absorber=absorber)
+def run_fdmnes_from_xyz(
+    xyz, directory, absorber=0, edge="K", filename="tmp", conv_path=None, bav_path=None
+):
+    fdmnes_coordinates, fdmnes_absorber = make_fdmnes_coordinates_from_xyz(
+        xyz, absorber=absorber
+    )
     fdmnes_inp = fdmnes_template.format(
-        absorber=fdmnes_absorber, edge=edge, filename=filename, coordinates=fdmnes_coordinates
+        absorber=fdmnes_absorber,
+        edge=edge,
+        filename=filename,
+        coordinates=fdmnes_coordinates,
     )
-    run_fdmnes_from_string(
-        fdmnes_inp, directory, filename=filename
-    )
-    
+    run_fdmnes_from_string(fdmnes_inp, directory, filename=filename)
+
     if conv_path is not None:
         os.makedirs(os.path.dirname(conv_path), exist_ok=True)
         shutil.copy(directory + f"{filename}_conv.txt", conv_path)
-        
+
     if bav_path is not None:
         os.makedirs(os.path.dirname(bav_path), exist_ok=True)
         shutil.copy(directory + f"{filename}_bav.txt", bav_path)
-    
-    
-    
-def run_fdmnes_from_xyz_file(xyz_file, directory, absorber=0, edge="K", filename="tmp", conv_path=None, bav_path=None):
+
+
+def run_fdmnes_from_xyz_file(
+    xyz_file,
+    directory,
+    absorber=0,
+    edge="K",
+    filename="tmp",
+    conv_path=None,
+    bav_path=None,
+):
     with open(xyz_file, "r") as f:
         xyz = f.read()
-    run_fdmnes_from_xyz(xyz, directory, absorber=absorber, edge=edge, filename=filename, conv_path=conv_path, bav_path=bav_path)
+    run_fdmnes_from_xyz(
+        xyz,
+        directory,
+        absorber=absorber,
+        edge=edge,
+        filename=filename,
+        conv_path=conv_path,
+        bav_path=bav_path,
+    )
+
 
 def lattice_points_to_xyz(lattice_points, atoms):
     lattice_points = np.array(lattice_points)
-    
+
     if isinstance(atoms, str):
         atoms = [atoms] * len(lattice_points)
     elif isinstance(atoms, list):
         if len(atoms) != len(lattice_points):
             raise ValueError("atoms and lattice_points must have the same length")
-    
+
     atoms = np.array(atoms)
 
     n_atoms = len(atoms)
