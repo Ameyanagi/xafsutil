@@ -166,7 +166,9 @@ Filout
 Conv_out
 {filename}_conv
 Radius
-11.1
+8.5
+R_self
+8.5
 Green
 Relativism
 Edge
@@ -179,10 +181,10 @@ Molecule
 
 {coordinates}
 Convolution
-Estart
--20
-Efermi
--1.
+!Estart
+!-20
+!Efermi
+!-1.
 End
 """
 
